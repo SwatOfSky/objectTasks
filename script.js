@@ -65,3 +65,112 @@ const invoke = (object, path, func, args) => {
 };
 
 console.log(invoke(data8, 'a.b', 'splice', [1, 2])); // [2, 3]
+
+//проверяет пустой ли объект
+const data9 = { a: { b: undefined } };
+const data10 = { a: { b: 1 } };
+const isEmptyDeep = (element) => {
+    if (element === null) {
+      return true;
+    }
+    if (Array.isArray(element)) {
+      if (element.length === 0) {
+        return true;
+      }
+      let result;
+      for (let i = 0; i < element.length; i += 1) {
+        if (typeof element[i] === 'boolean' || (typeof element[i] === 'number' && !Number.isNaN(element[i]))
+          || (typeof element[i] === 'string' && element[i] !== '')) {
+          result = false;
+          break;
+        }
+        if (Array.isArray(element[i]) || (typeof element[i] === 'object' && element[i] !== null)) {
+          result = isEmptyDeep(element[i]);
+          break;
+        }
+        result = true;
+      }
+      return result;
+    }
+    if (typeof element === 'object') {
+      const objectKeys = Object.keys(element);
+      if (objectKeys.length === 0) {
+        return true;
+      }
+      let result;
+      for (let i = 0; i < objectKeys.length; i += 1) {
+        const value = element[objectKeys[i]];
+        if (typeof value === 'boolean' || (typeof value === 'number' && !Number.isNaN(value))
+          || (typeof value === 'string' && value !== '')) {
+          result = false;
+          break;
+        }
+        if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+          result = isEmptyDeep(value);
+          break;
+        }
+        result = true;
+      }
+      return result;
+    }
+  };
+console.log(isEmptyDeep(data9));
+console.log(isEmptyDeep(data10));
+
+//делает глубокое сравнение объектов
+const dataX = { a: 1, b: { c: 1 } };
+const dataY = { a: 1, b: { c: 1 } };
+const dataZ = { a: 1, b: { c: 2 } };
+
+const isEqualDeep = (firstObj, secondObj) => {
+    const firstObjKeys = Object.keys(firstObj);
+    const secondObjKeys = Object.keys(secondObj);
+  
+    if (firstObjKeys.length === 0 && secondObjKeys.length === 0) {
+      return true;
+    }
+  
+    const compareList = firstObjKeys.map((key) => {
+      const valueOfFirstObject = firstObj[key];
+      const valueOfSecondObject = secondObj[key];
+      if ((Number.isNaN(valueOfFirstObject) && Number.isNaN(valueOfSecondObject))
+        || (valueOfFirstObject === null && valueOfSecondObject === null)) {
+        return true;
+      }
+      if (valueOfFirstObject === valueOfSecondObject) {
+        return true;
+      }
+      if (Array.isArray(valueOfFirstObject) && Array.isArray(valueOfSecondObject)) {
+        return isArraysEqualDeep(valueOfFirstObject, valueOfSecondObject);
+      }
+      if (typeof valueOfFirstObject === 'object' && typeof valueOfSecondObject === 'object') {
+        return isEqualDeep(valueOfFirstObject, valueOfSecondObject);
+      }
+  
+      return false;
+    });
+  
+    return !compareList.includes(false) && !compareList.includes(undefined);
+  };
+  
+  const isArraysEqualDeep = (firstArray, secondArray) => {
+    if (firstArray.length !== secondArray.length) {
+      return false;
+    }
+  
+    const compared = firstArray.map((el, id) => {
+      if (Array.isArray(el) && Array.isArray(secondArray[id])) {
+        return isArraysEqualDeep(el, secondArray[id]);
+      }
+      if (typeof el === 'object' && typeof secondArray[id] === 'object') {
+        return isEqualDeep(el, secondArray[id]);
+      }
+  
+      return secondArray[id] === el;
+    });
+  
+    return !compared.includes(false);
+  };
+
+console.log(isEqualDeep(dataX, dataY));
+console.log(isEqualDeep(dataX, dataZ));
