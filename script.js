@@ -174,3 +174,54 @@ const isEqualDeep = (firstObj, secondObj) => {
 
 console.log(isEqualDeep(dataX, dataY));
 console.log(isEqualDeep(dataX, dataZ));
+
+//поверхностно находит пересечения объектов и возвращает объект пересечений
+const dataQ = { a: 1, b: 2 };
+const dataW = { c: 1, b: 2 };
+const intersection = (firstObj, secondObj) => {
+  const firstObjKeys = Object.keys(firstObj);
+  return firstObjKeys.reduce((acc = {}, key) => {
+    if (firstObj[key] === secondObj[key]) {
+      acc = {
+        ...acc,
+        [key]: firstObj[key],
+      };
+    }
+    return acc;
+  }, {});
+}
+console.log(intersection(dataQ, dataW));
+
+//глубоко находит пересечения объектов и возвращает объект пересечений
+const dataE = { a: 1, b: { c: 3 } };
+const dataR = { c: 1, b: { c: 3 } };
+const intersectionDeep = (firstObj, secondObj) => {
+  const firstObjKeys = Object.keys(firstObj);
+  return firstObjKeys.reduce((acc = {}, key) => {
+    if (firstObj[key] === secondObj[key]) {
+      acc = {
+        ...acc,
+        [key]: firstObj[key],
+      };
+    }
+    if (Array.isArray(firstObj[key]) && Array.isArray(secondObj[key])) {
+      const isEqualArrays = isEqualDeep(firstObj[key], secondObj[key]);
+      if (isEqualArrays) {
+        acc = {
+          ...acc,
+          [key]: firstObj[key],
+        };
+      }
+    } else if (typeof firstObj[key] === 'object' && typeof secondObj[key] === 'object') {
+      const hasIntersection = intersectionDeep(firstObj[key], secondObj[key]);
+      if (Object.keys(hasIntersection).length !== 0) {
+        acc = {
+          ...acc,
+          [key]: hasIntersection,
+        };
+      }
+    }
+    return acc;
+  }, {});
+};
+console.log(intersectionDeep(dataE, dataR));
